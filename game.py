@@ -5,6 +5,35 @@ from feedback import evaluate
 MAX_GUESSES = 6
 
 
+def format_history(history):
+    """Turn [(guess, feedback), ...] into numbered lines like '1. SPEED  gray yellow ...'."""
+    return [
+        f"{n}. {guess.upper()}  {' '.join(feedback)}"
+        for n, (guess, feedback) in enumerate(history, start=1)
+    ]
+
+
+def print_history(history):
+    print("--- Guesses so far ---")
+    for line in format_history(history):
+        print(line)
+
+
+def print_summary(length, target, result, history):
+    print()
+    print("===== Game summary =====")
+    print(f"Word length: {length}")
+    print(f"Target word: {target.upper()}")
+    print(f"Result: {result}")
+    print(f"Accepted guesses: {len(history)}/{MAX_GUESSES}")
+    print("History:")
+    if history:
+        for line in format_history(history):
+            print(line)
+    else:
+        print("(no guesses)")
+
+
 class WordleGame:
     def __init__(self, length=5):
         self.length = length
@@ -26,19 +55,27 @@ class WordleGame:
 
     def run(self):
         print(f"Wordle - {self.length} letters, {MAX_GUESSES} guesses. Type 'quit' to exit.")
+        result = "lost"
         while len(self.history) < MAX_GUESSES:
             guess = input("> ").strip().lower()
             if guess == "quit":
-                print("Thanks for playing!")
-                return
+                result = "quit"
+                break
             error = self.validate(guess)
             if error:
                 print(error)
                 continue
             feedback = evaluate(self.target, guess)
             self.history.append((guess, feedback))
-            print(" ".join(feedback))
+            print_history(self.history)
             if guess == self.target:
-                print(f"You win! Solved in {len(self.history)}/{MAX_GUESSES} guesses.")
-                return
-        print(f"You lose! The word was: {self.target}")
+                result = "won"
+                break
+
+        if result == "won":
+            print(f"You win! Solved in {len(self.history)}/{MAX_GUESSES} guesses.")
+        elif result == "lost":
+            print(f"You lose! The word was: {self.target}")
+        else:
+            print("Thanks for playing!")
+        print_summary(self.length, self.target, result, self.history)
