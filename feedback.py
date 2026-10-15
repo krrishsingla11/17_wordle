@@ -1,13 +1,23 @@
 def evaluate(target, guess):
-
-    # occurrence, producing incorrect duplicate-letter feedback.
     result = ["gray"] * len(guess)
-    for i, ch in enumerate(guess):
-        if ch == target[i]:
+
+    # Pass 1: greens
+    for i in range(len(guess)):
+        if guess[i] == target[i]:
             result[i] = "green"
-    for i, ch in enumerate(guess):
+
+    # Count target letters not used up by greens
+    remaining = {}
+    for i in range(len(target)):
+        if result[i] != "green":
+            remaining[target[i]] = remaining.get(target[i], 0) + 1
+
+    # Pass 2: yellows, using up one copy each time
+    for i in range(len(guess)):
         if result[i] == "green":
             continue
-        if ch in target:
+        if remaining.get(guess[i], 0) > 0:
             result[i] = "yellow"
+            remaining[guess[i]] -= 1
+
     return result
