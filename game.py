@@ -9,6 +9,8 @@ class WordleGame:
     def __init__(self, length=5):
         self.length = length
         self.words = [w for w in WORDS if len(w) == length]
+        if not self.words:
+            raise ValueError(f"No {length}-letter words in words.py. Add some to play this mode.")
         self.target = random.choice(self.words)
         self.history = []
 
